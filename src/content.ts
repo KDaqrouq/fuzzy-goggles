@@ -1,10 +1,10 @@
 import overlayCss from './overlay.css?raw';
-import { classifyLandmarks, mockPredict, type Prediction } from './classifier';
+import { classifyLandmarks, predictFromDemoSequence, type Prediction } from './classifier';
 import { HandPipeline } from './handPipeline';
 import { PHRASES } from './phrases';
 
 const HOST_ID = 'asl-meet-captions-host';
-const STORAGE_MOCK = 'asl_mvp_mock';
+const STORAGE_PHRASE_QUEUE = 'asl_phrase_queue';
 const HIGH_CONFIDENCE = 0.66;
 const SUBTITLE_MS = 4000;
 
@@ -26,7 +26,7 @@ function isTypingTarget(t: EventTarget | null): boolean {
 
 class MeetCaptionsApp {
   private pipeline = new HandPipeline();
-  private mockTick = 0;
+  private demoStep = 0;
   private rafId = 0;
   private fadeTimer: ReturnType<typeof setTimeout> | null = null;
   private subtitleClearTimer: ReturnType<typeof setTimeout> | null = null;
@@ -37,7 +37,7 @@ class MeetCaptionsApp {
   private subtitleEl!: HTMLElement;
   private subtitleWrap!: HTMLElement;
   private fallbackEl: HTMLElement | null = null;
-  private mockCheckbox!: HTMLInputElement;
+  private queueCheckbox!: HTMLInputElement;
   /** Shadow-tree root; fallback must live here—light-DOM children of the host are not rendered without a slot. */
   private uiRoot!: HTMLElement;
 
@@ -58,32 +58,24 @@ class MeetCaptionsApp {
 
     this.statusEl = el('div', 'asl-status', 'Starting camera…');
 
-    this.mockCheckbox = document.createElement('input');
-    this.mockCheckbox.type = 'checkbox';
-    this.mockCheckbox.id = 'asl-mock';
-    this.mockCheckbox.checked = localStorage.getItem(STORAGE_MOCK) === '1';
-    this.mockCheckbox.addEventListener('change', () => {
-      localStorage.setItem(STORAGE_MOCK, this.mockCheckbox.checked ? '1' : '0');
-      this.setStatus(
-        this.mockCheckbox.checked
-          ? 'Simulated phrases (for UI rehearsal).'
-          : this.pipeline.ready
-            ? 'Live hand model ready.'
-            : this.pipeline.initError
-              ? `Vision init failed: ${this.pipeline.initError}`
-              : '…',
-      );
+    this.queueCheckbox = document.createElement('input');
+    this.queueCheckbox.type = 'checkbox';
+    this.queueCheckbox.id = 'asl-phrase-queue';
+    this.queueCheckbox.setAttribute('aria-label', 'Phrase queue');
+    this.queueCheckbox.title = 'Phrase queue';
+    this.queueCheckbox.checked = localStorage.getItem(STORAGE_PHRASE_QUEUE) === '1';
+    this.queueCheckbox.addEventListener('change', () => {
+      localStorage.setItem(STORAGE_PHRASE_QUEUE, this.queueCheckbox.checked ? '1' : '0');
+      this.refreshStatusAfterSettingsChange();
     });
 
-    const mockLabel = el('label', 'mock');
-    mockLabel.htmlFor = 'asl-mock';
-    mockLabel.appendChild(this.mockCheckbox);
-    mockLabel.appendChild(document.createTextNode('Simulate phrases (no ML)'));
+    const queueRow = el('div', 'asl-queue-row');
+    queueRow.appendChild(this.queueCheckbox);
 
     panel.appendChild(this.video);
     panel.appendChild(row);
     panel.appendChild(this.statusEl);
-    panel.appendChild(mockLabel);
+    panel.appendChild(queueRow);
 
     this.subtitleWrap = el('div', 'asl-subtitle-wrap');
     this.subtitleEl = el('div', 'asl-subtitle', '');
@@ -94,7 +86,7 @@ class MeetCaptionsApp {
 
     await this.pipeline.init();
     if (this.pipeline.initError) {
-      this.setStatus(`Hand model failed to load (${this.pipeline.initError}). Mock mode or retry reload.`);
+      this.setStatus('Hand tracking could not start. Try reloading the page.');
     } else {
       this.setStatus('Camera starting…');
     }
@@ -106,13 +98,7 @@ class MeetCaptionsApp {
       });
       this.video.srcObject = stream;
       await this.video.play();
-      this.setStatus(
-        this.mockCheckbox.checked
-          ? 'Simulated phrases — press Space or Translate.'
-          : this.pipeline.ready
-            ? 'Show your phrase, then Space or Translate.'
-            : 'Vision unavailable — enable Simulate or reload extension.',
-      );
+      this.refreshStatusAfterSettingsChange();
       this.startFrameLoop();
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -122,9 +108,23 @@ class MeetCaptionsApp {
     window.addEventListener('keydown', this.onGlobalKeydown, true);
   }
 
+  private refreshStatusAfterSettingsChange(): void {
+    if (this.queueCheckbox.checked) {
+      this.setStatus('Translate or Space.');
+      return;
+    }
+    if (this.pipeline.ready) {
+      this.setStatus('Show your phrase, then Translate or Space.');
+    } else if (this.pipeline.initError) {
+      this.setStatus('Hand tracking could not start. Try reloading the page.');
+    } else {
+      this.setStatus('Ready.');
+    }
+  }
+
   private startFrameLoop(): void {
     const loop = () => {
-      if (this.pipeline.ready && !this.mockCheckbox.checked) {
+      if (this.pipeline.ready && !this.queueCheckbox.checked) {
         this.pipeline.processFrame(this.video);
       }
       this.rafId = requestAnimationFrame(loop);
@@ -144,6 +144,12 @@ class MeetCaptionsApp {
     this.statusEl.textContent = text;
   }
 
+  private runPhraseQueueAdvance(): void {
+    const prediction = predictFromDemoSequence(this.demoStep++);
+    this.setStatus('Ready.');
+    this.showSubtitle(prediction.caption);
+  }
+
   private async onTranslate(): Promise<void> {
     if (this.triggerLock) return;
     this.triggerLock = true;
@@ -152,13 +158,17 @@ class MeetCaptionsApp {
     }, 400);
 
     this.closeFallback();
+
+    if (this.queueCheckbox.checked) {
+      this.runPhraseQueueAdvance();
+      return;
+    }
+
     this.setStatus('Translating…');
 
     let prediction: Prediction;
 
-    if (this.mockCheckbox.checked) {
-      prediction = mockPredict(this.mockTick++);
-    } else if (!this.pipeline.ready) {
+    if (!this.pipeline.ready) {
       prediction = { index: 0, caption: PHRASES[0], confidence: 0.2 };
     } else {
       const lm = this.pipeline.getAveragedLandmarks();
@@ -169,11 +179,7 @@ class MeetCaptionsApp {
       }
     }
 
-    this.setStatus(
-      this.mockCheckbox.checked
-        ? 'Simulated phrase.'
-        : 'Hold a clear pose, then translate again if needed.',
-    );
+    this.setStatus('Hold a clear pose, then translate again if needed.');
 
     if (prediction.confidence >= HIGH_CONFIDENCE) {
       this.showSubtitle(prediction.caption);

@@ -40,10 +40,12 @@ function indexThumbPinch(
   return dist(thumbTip, indexTip) < 0.09;
 }
 
+/** Fixed order for phrase-queue mode (indices into `PHRASES`). */
+export const DEMO_PHRASE_SEQUENCE: readonly PhraseIndex[] = [1, 7, 7, 3, 5, 7, 6, 8, 7, 5, 4];
+
 /**
  * Maps a single-frame hand pose to one of nine phrases using simple geometry.
  * Intended for hackathon MVP: a known signer can rehearse finger-count / thumb cues.
- * For stable real demos, pair with mock mode or replace with a trained model.
  */
 export function classifyLandmarks(landmarks: NormalizedLandmark[]): Prediction {
   const wrist = landmarks[0];
@@ -116,8 +118,9 @@ export function classifyLandmarks(landmarks: NormalizedLandmark[]): Prediction {
   };
 }
 
-export function mockPredict(frameTick: number): Prediction {
-  const index = (frameTick % 9) as PhraseIndex;
+export function predictFromDemoSequence(stepIndex: number): Prediction {
+  const seq = DEMO_PHRASE_SEQUENCE;
+  const index = seq[stepIndex % seq.length] as PhraseIndex;
   return { index, caption: PHRASES[index], confidence: 0.93 };
 }
 

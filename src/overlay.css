@@ -56,10 +56,6 @@
   filter: brightness(1.08);
 }
 
-.asl-panel button.secondary {
-  background: #3c4043;
-}
-
 .asl-panel .asl-status {
   font-size: 11px;
   color: #bdc1c6;
@@ -67,14 +63,18 @@
   line-height: 1.35;
 }
 
-.asl-panel label.mock {
+.asl-panel .asl-queue-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.asl-panel .asl-queue-row input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
   cursor: pointer;
-  color: #e8eaed;
+  flex-shrink: 0;
 }
 
 .asl-subtitle-wrap {
