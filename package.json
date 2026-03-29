@@ -1,0 +1,33 @@
+{
+  "name": "fuzzy_goggles",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000f\u0000u\u0000z\u0000z\u0000y\u0000-\u0000g\u0000o\u0000g\u0000g\u0000l\u0000e\u0000s\u0000\r\u0000 \u0000",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "prebuild": "node scripts/ensure-model.mjs",
+    "build": "vite build",
+    "watch": "vite build --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KDaqrouq/fuzzy-goggles.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KDaqrouq/fuzzy-goggles/issues"
+  },
+  "homepage": "https://github.com/KDaqrouq/fuzzy-goggles#readme",
+  "devDependencies": {
+    "@types/chrome": "^0.1.38",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.3"
+  },
+  "dependencies": {
+    "@mediapipe/tasks-vision": "^0.10.34"
+  }
+}

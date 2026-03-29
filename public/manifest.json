@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "ASL Meeting Captions",
+  "version": "1.0.0",
+  "description": "Webcam hand-gesture phrases as Meet overlay captions (hackathon MVP).",
+  "permissions": [],
+  "host_permissions": ["https://meet.google.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://meet.google.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["wasm/*"],
+      "matches": ["https://meet.google.com/*"]
+    }
+  ]
+}

@@ -1,0 +1,189 @@
+:host {
+  all: initial;
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+}
+
+:host * {
+  box-sizing: border-box;
+}
+
+.asl-panel {
+  pointer-events: auto;
+  position: fixed;
+  top: 96px;
+  right: 16px;
+  width: 220px;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(20, 20, 24, 0.92);
+  color: #f4f4f5;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  z-index: 2147483647;
+}
+
+.asl-panel video {
+  width: 100%;
+  border-radius: 6px;
+  background: #000;
+  display: block;
+}
+
+.asl-panel .asl-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  align-items: center;
+}
+
+.asl-panel button {
+  flex: 1;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #1a73e8;
+  color: #fff;
+}
+
+.asl-panel button:hover {
+  filter: brightness(1.08);
+}
+
+.asl-panel button.secondary {
+  background: #3c4043;
+}
+
+.asl-panel .asl-status {
+  font-size: 11px;
+  color: #bdc1c6;
+  margin-top: 6px;
+  line-height: 1.35;
+}
+
+.asl-panel label.mock {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  margin-top: 8px;
+  cursor: pointer;
+  color: #e8eaed;
+}
+
+.asl-subtitle-wrap {
+  pointer-events: none;
+  position: fixed;
+  left: 50%;
+  bottom: 72px;
+  transform: translateX(-50%);
+  max-width: min(92vw, 960px);
+  z-index: 2147483646;
+}
+
+.asl-subtitle {
+  padding: 14px 22px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.78);
+  color: #fff;
+  font-size: clamp(18px, 2.4vw, 26px);
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.35;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: opacity 0.45s ease;
+}
+
+.asl-subtitle.asl-fade {
+  opacity: 0;
+}
+
+.asl-fallback {
+  pointer-events: auto;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 420px);
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(32, 33, 36, 0.97);
+  color: #e8eaed;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  z-index: 2147483647;
+}
+
+.asl-fallback h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.asl-fallback .asl-guess {
+  font-size: 13px;
+  color: #bdc1c6;
+  margin-bottom: 12px;
+}
+
+.asl-fallback .asl-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.asl-fallback .asl-actions button {
+  flex: 1;
+  min-width: 100px;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.asl-fallback .asl-actions .confirm {
+  background: #1a73e8;
+  color: #fff;
+}
+
+.asl-fallback .asl-actions .retry {
+  background: #5f6368;
+  color: #fff;
+}
+
+.asl-fallback select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #5f6368;
+  background: #3c4043;
+  color: #fff;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.asl-fallback .choose-row {
+  display: flex;
+  gap: 8px;
+}
+
+.asl-fallback .choose-row button {
+  flex: 1;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  padding: 8px;
+  background: #1a73e8;
+  color: #fff;
+  font-weight: 600;
+}
