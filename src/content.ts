@@ -38,8 +38,11 @@ class MeetCaptionsApp {
   private subtitleWrap!: HTMLElement;
   private fallbackEl: HTMLElement | null = null;
   private mockCheckbox!: HTMLInputElement;
+  /** Shadow-tree root; fallback must live here—light-DOM children of the host are not rendered without a slot. */
+  private uiRoot!: HTMLElement;
 
   async mount(root: HTMLElement): Promise<void> {
+    this.uiRoot = root;
     const panel = el('div', 'asl-panel');
     this.video = el('video', '') as HTMLVideoElement;
     this.video.setAttribute('playsinline', '');
@@ -251,8 +254,7 @@ class MeetCaptionsApp {
     card.appendChild(select);
     card.appendChild(chooseRow);
 
-    const host = document.getElementById(HOST_ID);
-    host?.appendChild(card);
+    this.uiRoot.appendChild(card);
     this.fallbackEl = card;
   }
 
